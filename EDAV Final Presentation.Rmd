@@ -15,19 +15,19 @@ This is an R Markdown presentation. Markdown is a simple formatting syntax for a
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
 
-## Slide with Bullets
+## Executive Summary
 
 - Bullet 1
 - Bullet 2
 - Bullet 3
 
-## Slide with R Output
+## Summary Numbers
 
 ```{r cars, echo = TRUE}
 summary(cars)
 ```
 
-## Slide with Plot
+## Summary Graphs
 
 ```{r pressure}
 plot(pressure)

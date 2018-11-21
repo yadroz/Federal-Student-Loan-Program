@@ -6,10 +6,39 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE, 
+                      cache = TRUE)
+
+options(scipen=999)
 ```
 
-## R Markdown
+
+# Introduction
+
+The Federal Student Loan program is a key funding mechanism individuals in the United States use to pursue higher education.  The program has reportedly grown quickly in the last decade and now outstanding student loan balances make up the biggest component of the Federal Government's balance sheet.  We attempt to look at data to get a better understanding of this program and the potential impact student lending could have on the borrowers and the broader economy.  We decided to work on this project because we think there is limited scrutiny and public understanding of the magnitude of the program and how critical it will become for the financial future of the United States and the state of higher education.  
+
+
+# Description of data
+
+# Analysis of data quality
+
+# Main Analysis
+
+### Q1) How big is the market and how is it distributed across the country?
+
+### Q2) Who are the borrowers? Where are they from and how much debt do they have? What is the debt being used for?
+
+### Q3) Can we identify regions of the country that are have a lot of student loan debt concentration?
+
+### Q4) What has changed in recent years in this program?  
+
+### Q5) Can we identify problematic loans?  Where are they concentrated and what can be their impact?
+
+### Q6) How has the performance of these loans been?  Is this a problem for the Federal Government?
+
+
 
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
