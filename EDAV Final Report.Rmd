@@ -22,11 +22,91 @@ The Federal Student Loan program is a key funding mechanism individuals in the U
 
 # Description of data
 
+We used two types of data, one on the student loan market and one on economic indicators that we used to 'normalize' the student loan data to other indications of the economic and population.  
+
+1. Student Loan Data:
+    + NY Fed - XLS spreadsheet that's updated anually with Aggregate data on the market.     https://www.newyorkfed.org/medialibrary/interactives/householdcredit/data/xls/sl_update_2018.xlsx
+    + Department of Education - XLS spreadsheet with summary data across different cohorts.  https://studentaid.ed.gov/sa/about/data-center/student/portfolio
+    
+2. Economic Indicators:
+    + University of Kentucky, Center for Poverty Research - XLS spreadsheet with collection of economic indicators by State
+.     http://ukcpr.org/resources/national-welfare-data
+    
+  
+
+
+
+
 # Analysis of data quality
 
 # Main Analysis
 
-### Q1) How big is the market and how is it distributed across the country?
+### Q1) How big is the market, how fast has it grown? how does size and growth compare to the size and growth of the economy/population in large?
+
+```{r}
+
+# Download Overall Portfolio Data 
+library(readxl)
+library(wbstats)
+
+url <- "https://studentaid.ed.gov/sa/sites/default/files/fsawg/datacenter/library/PortfolioSummary.xls"
+destfile <- "PortfolioSummary.xls"
+curl::curl_download(url, destfile)
+PortfolioSummary <- read_excel(destfile, 
+    skip = 5)
+#View(PortfolioSummary)
+PortfolioSummary$X__1[1:6] <- "Q4"
+library(zoo)
+PortfolioSummary$Year <- paste(na.locf(PortfolioSummary$`Federal Fiscal Year2`),PortfolioSummary$X__1)
+dataSet <- PortfolioSummary[1:29,c('Year',"Dollars Outstanding            (in billions)__1","Unduplicated Recipients    (in millions)")]
+dataSet$date <- as.Date( as.yearqtr( dataSet$Year) )
+
+library(quantmod)
+gdp = getSymbols('GDP',src='FRED', auto.assign=F) 
+gdp.df = data.frame(date=time(gdp), coredata(gdp) )
+pop = getSymbols('LFWA64TTUSQ647N',src='FRED', auto.assign=F) 
+pop.df = data.frame(date=time(pop), coredata(pop) )
+income = getSymbols('PINCOME',src='FRED', auto.assign=F) 
+income.df = data.frame(date=time(income), coredata(income) )
+
+library(dplyr)
+df_merged <- inner_join(dataSet, gdp.df, by = 'date')
+df_merged <- inner_join(df_merged, pop.df, by = 'date')
+df_merged <- inner_join(df_merged, income.df, by = 'date')
+
+df_merged <- df_merged %>% mutate(Debt = `Dollars Outstanding            (in billions)__1`, Borrowers = `Unduplicated Recipients    (in millions)`,Population = LFWA64TTUSQ647N/1e6) %>% select(date,GDP,Debt,Borrowers,Population,PINCOME) %>% mutate( quarter = format(as.yearqtr(date),"Q%q"))
+
+df_merged <- df_merged %>% mutate(GDP_s = 516 * GDP/df_merged$GDP[1])
+
+
+# tidy dataframe
+tidy_df_merged <- df_merged %>% filter(quarter == "Q4") %>% gather(key = "indicator",value = "level",-date) %>% filter(indicator == c("Borrowers"))
+
+tidy_df_merged$level <- as.numeric(tidy_df_merged$level)
+
+# plot timeseries
+ggplot(tidy_df_merged , aes(x = date, y = level)) + 
+  geom_line(aes(color = indicator), size = 1) +
+  scale_color_manual(values = c("#00AFBB", "#E7B800","coral3","khaki2","black")) +
+  theme_minimal() + ggtitle("Plot of four tech stocks", subtitle = "Using same starting point.  Date range: 2006-12-31, to 2016-12-31")
+
+
+tidy_df_merged <- df_merged %>% filter(quarter == "Q4") %>% gather(key = "indicator",value = "level",-date,-quarter) %>% filter(indicator == c("Debt","GDP_s"))
+
+
+tidy_df_merged$level <- as.numeric(tidy_df_merged$level)
+
+# plot timeseries
+ggplot(tidy_df_merged , aes(x = date, y = level)) + 
+  geom_line(aes(color = indicator), size = 1) +
+  scale_color_manual(values = c("#00AFBB", "#E7B800","coral3","khaki2","black")) +
+  theme_minimal() + ggtitle("Plot of four tech stocks", subtitle = "Using same starting point.  Date range: 2006-12-31, to 2016-12-31")
+
+
+
+```
+
+## Q2) How widely distributed is the debt?
 
 ### Q2) Who are the borrowers? Where are they from and how much debt do they have? What is the debt being used for?
 
